@@ -1,0 +1,228 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PreAlfa
+{
+    class Elemek
+    {
+        private int[][,] elemek = new int[13][,];
+        //private int[,] elemek;
+        private int x;
+        private int y;
+        private int melyikElem;
+
+        //public int thisX { get; set; }
+        //public int thisY { get; set; }
+        public int MelyikElem
+        {
+            get
+            {
+                return this.melyikElem;
+            }
+            set
+            {
+                this.melyikElem = value;
+            }
+        }
+
+
+        public Elemek()
+        {
+            this.x = 0;     //ez azért jó mert ezeknek csak a megváltoztatásával tudok léptetni a formát hahahhahahahahhah
+            this.y = 0;
+
+            elemek[0] = new int[2, 2] { { 1, 1 }, { 1, 1 } };                //negyzet
+            elemek[1] = new int[3, 2] { { 0, 1 }, { 1, 1 }, { 0, 1 } }; //piramis
+            elemek[2] = new int[3, 2] { { 0, 1 }, { 0, 1 }, { 1, 1 } };//L
+            elemek[3] = new int[4, 1] { { 1 }, { 1 }, { 1 }, { 1 } };       //rúd
+            elemek[4] = new int[3, 2] { { 0, 1 }, { 1, 1 }, { 1, 0 } };     //harry potter jel
+            //segedek (forgatott elemek jönnek)
+            elemek[5] = new int[1, 4] { { 1, 1, 1, 1 } };
+            elemek[6] = new int[2, 3] { { 0, 1, 1 }, { 1, 1, 0 } };
+            //ha ezek vannak akkor kell egy bool amit majd atallit hogy forgatva van e vagy eredetiben
+            //piramis
+            elemek[7] = new int[2, 3] { { 1, 1, 1 }, { 0, 1, 0 } };
+            elemek[8] = new int[3, 2] { { 1, 0 }, { 1, 1 }, { 1, 0 } };
+            elemek[9] = new int[2, 3] { { 0, 1, 0 }, { 1, 1, 1 } };
+            //L
+            elemek[10] = new int[2, 3] { { 1, 1, 1 }, { 0, 0, 1 } };
+            elemek[11] = new int[3, 2] { { 1, 1 }, { 1, 0 }, { 1, 0 } };
+            elemek[12] = new int[2, 3] { { 1, 0, 0 }, { 1, 1, 1 } };
+
+            this.melyikElem = -1;
+        }
+
+
+
+
+        public void Megjelenit(int x, int y, int statusz, int melyikElem)
+        {
+            for (int i = 0; i < elemek[melyikElem].GetLength(0); i++)
+            {
+                for (int j = 0; j < elemek[melyikElem].GetLength(1); j++)
+                {
+                    if (elemek[melyikElem][i, j] == 1)
+                    {
+                        Program.palya[x, y] = statusz;
+                        y++;
+                    }
+                    else if (elemek[melyikElem][i, j] == 0)
+                    {
+                        y++;
+                    }
+                }
+                x++;
+                y = y - elemek[melyikElem].GetLength(1);
+
+            }
+
+        }
+
+
+        //LÉTREHOZÁS
+        public void Spawn(Random r)
+        {
+            this.x = r.Next(1, 8);  //itt a 7 lehet a legnagyobb random érték, mert a egyenes forma az 1x4 ez és bele"spawnolna a pálya szélébe ami crasht okoz :(
+            this.y = 0;
+            //addig kell mennie ameddig a elem tart, nem amennyi az elem hossza
+
+            MelyikElem = r.Next(0, 5);  //ez randomizálja, hogy milyen elem következik
+            Megjelenit(this.x, this.y, 1, MelyikElem);    //a statusz azt akarná jelenteni, hogy az adott ponton van e érték. ez a törlésnél nagy segítség, mert ott csak egy 0-t kell változtatni, mmm többé kevésbé
+
+        }
+
+
+        public void Torles()
+        {
+            Megjelenit(this.x, this.y, 0, MelyikElem);
+        }
+
+
+        public bool VanEValamiJobbra()
+        {
+            for (int i = this.y; i < this.y + elemek[MelyikElem].GetLength(1); i++)
+            {
+                if (Program.palya[this.x + elemek[MelyikElem].GetLength(0), i] == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+
+        }
+
+        public bool VanEValamiBalra()
+        {
+            for (int i = this.y; i < this.y + elemek[MelyikElem].GetLength(1); i++)
+            {
+                if (Program.palya[this.x - 1, i] == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool VanEValamiAlatta()
+        {
+            //{//itt azért kellett a -1 mert az i-t még egyszer növeli, eléri a forma hosszát, és utánna az if még ott is megnézi, ha ez a ciklus végigmegy
+
+            int szam = elemek[MelyikElem].GetLength(1) - 1;
+            int x = 0;
+            int i = this.x;
+            while (i<=this.x +elemek[MelyikElem].GetLength(0)-1)
+            {
+                int j = szam;
+                
+                while (j>=0 && elemek[MelyikElem][x,j]==0)
+                {
+                    j--;
+                }
+                if (Program.palya[i,this.y+j+1]==1 || Program.palya[i, this.y + j + 1] == 2)
+                {
+                    return true;
+                }
+                i++;
+                x++;
+            }
+            return false;
+
+        }//itt azt kell megnézni hogy a pálya adott pontján van e 1 es ha igen akkor léphet
+
+
+
+        public void Mozgat(string merre)    //a bemenet azért jó, mert lehet navigalni, hogy lefelenyil==le,stb.
+        {
+            if (merre == "le")
+            {
+                Torles();
+                this.y++;
+                Megjelenit(this.x, this.y, 1, MelyikElem);
+
+            }
+            else if (merre == "jobbra")
+            {
+                Torles();
+                this.x++;
+                Megjelenit(this.x, this.y, 1, MelyikElem);
+
+            }
+            else if (merre == "balra")
+            {
+                Torles();
+                this.x--;
+                Megjelenit(this.x, this.y, 1, MelyikElem);
+
+            }
+        }
+
+        public void Reset()
+        {
+            this.x = 0;
+            this.y = 0;
+        }
+
+
+        public void Forgatas(int melyik)//kell még egy metódus ami figyeli azt hogy lehet e forgatni.
+        {
+            if (melyik == 0)
+                SegedForgatas(0);//négyzetnél
+            else if (melyik == 3)
+                SegedForgatas(5);//rudnál
+            else if (melyik == 5)
+                SegedForgatas(3);
+            else if (melyik == 4)
+                SegedForgatas(6);//harry potter jelnél
+            else if (melyik == 6)
+                SegedForgatas(4);
+            else if (melyik == 1)
+                SegedForgatas(7);//piramis
+            else if (melyik == 7)
+                SegedForgatas(8);
+            else if (melyik == 8)
+                SegedForgatas(9);
+            else if (melyik == 9)
+                SegedForgatas(1);
+            else if (melyik == 2)
+                SegedForgatas(10);
+            else if (melyik == 10)
+                SegedForgatas(11);
+            else if (melyik == 11)
+                SegedForgatas(12);
+            else if (melyik == 12)
+                SegedForgatas(2);
+        }
+
+        private void SegedForgatas(int melyikre)
+        {
+            Torles();
+            Megjelenit(this.x, this.y, 1, melyikre);
+            this.melyikElem = melyikre;
+        }
+
+
+    }
+}
